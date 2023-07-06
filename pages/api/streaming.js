@@ -11,12 +11,27 @@ export default function handler(req, res) {
       throw new Error("No input");
     }
     // Initialize model
+    const chat = new OpenAI({
+      streaming: true,
+      callbacks: [
+        {
+          handleLLMNewToken(token) {
+            sse.send(token, "newToken");
+          },
+        },
+      ],
+    });
 
     // create the prompt
+    const prompt = `Create me a short rap about ${input}, in the style of Kendrick Lamar. Make it clever and witty.`;
+    console.log({ prompt });
 
     // call frontend to backend
+    chat.call(prompt).then(() => {
+      sse.send(null, "end");
+    });
 
-    return res.status(200).json({ result: "OK" });
+    return res.status(200).json({ result: "Streaming Complete" });
   } else if (req.method === "GET") {
     sse.init(req, res);
   } else {

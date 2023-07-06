@@ -10,11 +10,12 @@ const Streaming = () => {
   const [prompt, setPrompt] = useState("");
   const [error, setError] = useState(null);
   const [data, setData] = useState("");
-  //   add code
+  const [source, setSource] = useState(null);
+  
 
   const processToken = (token) => {
-    // add code
-    return;
+    // replace back ticks n quotes
+    return token.replace(/\\n/g, "\n").replace(/\"/g, "")
   };
 
   const handlePromptChange = (e) => {
@@ -23,7 +24,33 @@ const Streaming = () => {
 
   const handleSubmit = async () => {
     try {
-      //   add code
+      console.log(`sending ${prompt}`);
+      await fetch("/api/streaming", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ input: prompt})
+      })
+      // Close existing Sources
+      if (source) {
+          source.close()
+      }
+      // Create New Event Source
+      const newSource = new EventSource("/api/streaming");
+      
+
+      setSource(newSource);
+
+      newSource.addEventListener("newToken", (event)=>{
+        const token = processToken(event.data)
+        setData((prevData) => prevData + token)
+      })
+
+      newSource.addEventListener("end", () => {
+          newSource.close()
+      })
+
     } catch (err) {
       console.error(err);
       setError(error);
@@ -31,7 +58,15 @@ const Streaming = () => {
   };
 
   // Clean up the EventSource on component unmount
-  //   add code
+  useEffect(()=> {
+    // stuff happens
+    return () => {
+      if (source) {
+          source.close()
+      }
+    }
+  }, [source])
+
   return (
     <>
       <Title emoji="💭" headingText="Streaming" />
