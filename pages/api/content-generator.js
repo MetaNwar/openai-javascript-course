@@ -12,6 +12,11 @@ import getVideoMetaData from "../../utils/getVideoMetaData";
 import ResearchAgent from "../../agents/ResearchAgent";
 
 // Global Variables
+let chain;
+let chatHistory=[];
+let transcript = "";
+let metadataString = "";
+let research;
 
 // Initialize Chain with Data
 const initChain = async (transcript, metadataString, research, topic) => {
@@ -51,6 +56,32 @@ export default async function handler(req, res) {
     console.log("Received URL");
     try {
       // Initialize chain with transcript, metadata, research, and topic
+      const videoId = extractVideoId(prompt);
+      // console.log({ videoId });
+      const transcriptResponse = await YoutubeTranscript.fetchTranscript(
+        videoId
+      );
+
+      transcriptResponse.forEach(( line ) => {
+        transcript += line.text;
+      });
+
+      // console.log({ transcript });
+
+      if (!transcriptResponse) {
+        return res.status (400).json({ error: "Failed to get transcript"});
+      }
+
+      // Video Metadata => YouTube Data API v3
+      const metadata = await getVideoMetaData(videoId);
+      // console.log({ metadata });
+
+      metadataString = JSON.stringify( metadata, null, 2);
+      // console.log(typeof metadataString );
+
+      //Research from the Web
+      // topic = "Pedro Pascal" - search web for past 2021 data
+      research = await ResearchAgent(topic);
 
       // return res.status(200).json({ output: research });
       return res.status(200).json({

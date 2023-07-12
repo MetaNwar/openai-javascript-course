@@ -6,7 +6,23 @@ export default async function getVideoMetaData(videoId) {
 
   try {
     // { data: {items: [metadata]}}
+    const response = await axios.get(url);
+    const data = response.data;
+
+    const metadata = data.items[0];
+
     // Clean up the response
+    const videoTitle = metadata.snippet.title;
+    const videoDescription = metadata.snippet.description;
+    const shortenedDescription = videoDescription.split(".") [0];
+
+
+    const shortMetadata = {
+      videoTitle,
+      videoDescription: shortenedDescription,
+      videoId,
+    }
+    return shortMetadata
   } catch (err) {
     console.error(`Failed to get metadata: ${err}`);
   }

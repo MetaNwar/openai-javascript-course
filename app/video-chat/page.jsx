@@ -25,7 +25,7 @@ const VideoChat = () => {
   // And we'll set an initial message as well, to make the UI look a little nicer.
   const [messages, setMessages] = useState([
     {
-      text: "Hi there! I'm YT chatbot. Please provide a YouTube video URL and I'll answer any questions you have.",
+      text: "Hi there! I'm YouTube chatbot. Please provide a YouTube video URL and I'll answer any questions you have.",
       type: "bot",
     },
   ]);
