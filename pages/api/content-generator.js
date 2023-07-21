@@ -22,6 +22,36 @@ let research;
 const initChain = async (transcript, metadataString, research, topic) => {
   try {
     // do stuff
+    const llm = new ChatOpenAI({
+      temperature: 0.7, 
+      modelName: "gpt-3.5-turbo",
+    });
+
+    const chatPrompt = ChatPromptTemplate.fromPromptMessages([
+      SystemMessagePromptTemplate.fromTemplate(
+        "You are a helpful social media assistant that provides research, new content, and advice to me. \n You are given the transcript of the video: {transcript} \n and video metadate: {metadata} as well as additional research: {research}."
+      ),
+      HumanMessagePromptTemplate.fromTemplate("{input}. Remember to use the video transcript and research as reference.")
+    ]);
+
+    const question =`Write me script for a new video that provides commentary on this video in a lighthearted, joking manner. It should compliment ${topic} with puns.`
+
+    chain = new LLMChain({
+      prompt: chatPrompt,
+      llm: llm,
+    });
+
+    const response = await chain.call({
+      transcript,
+      metadata: metadataString,
+      research,
+      input: question,
+    });
+
+    chatHistory.push({
+      role: "assistant",
+      content: response.text,
+    });
 
     return response;
   } catch (error) {
@@ -83,6 +113,16 @@ export default async function handler(req, res) {
       // topic = "Pedro Pascal" - search web for past 2021 data
       research = await ResearchAgent(topic);
 
+      // console.log({ research});
+
+      //Create Chain
+      const response = await initChain(
+        transcript,
+        metadataString,
+        research,
+        topic
+      );
+
       // return res.status(200).json({ output: research });
       return res.status(200).json({
         output: response,
@@ -101,7 +141,22 @@ export default async function handler(req, res) {
     // Very similar to previous section, don't worry too much about this just copy and paste it from the previous section!
     console.log("Received question");
     try {
-      // do stuff
+      // Second Question
+      const question = prompt;
+      console.log('asking:', question);
+      console.log('using old chain:', chain);
+
+        const response = await chain.call({
+          transcript,
+          metadata: metadataString,
+          research,
+          input: question,
+        });
+
+        chatHistory.push({
+          role: "assistant",
+          content: response.text,
+        });
 
       // just make sure to modify this response as necessary.
       return res.status(200).json({

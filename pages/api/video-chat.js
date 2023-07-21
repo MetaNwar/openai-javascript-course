@@ -27,7 +27,7 @@ const initializeChain = async (initialPrompt, transcript) => {
 
     // Manually create VectorDB in app, can upload multiple documents to creat database
 
-    // const directory = "/Users/jamiegolden/openai-javascript-course";
+    // const directory = "/Users/nwar/openai-javascript-course";
     // await vectorStore.save(directory);
 
     // const loadedVectorStore = await HNSWLib.load(
@@ -36,7 +36,8 @@ const initializeChain = async (initialPrompt, transcript) => {
     // );
 
     chain = ConversationalRetrievalQAChain.fromLLM(
-      model, vectorStore.asRetriever(),
+      model, 
+       vectorStore.asRetriever(),
       { verbose: true }
     );
 
